@@ -1,0 +1,214 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #080504; /* Nền tối ấm, chân thật hơn */
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  overscroll-behavior: none; /* Chống bị kéo reload màn hình trên điện thoại */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Ánh sáng ấm tỏa ra phía sau */
+.ambient-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* Dùng clamp() để co giãn quầng sáng nhỏ lại khi ở trên thiết bị hẹp */
+  width: clamp(250px, 80vw, 500px);
+  height: clamp(250px, 80vw, 500px);
+  background: radial-gradient(
+    circle,
+    rgba(255, 60, 0, 0.08) 0%,
+    rgba(255, 30, 0, 0.03) 40%,
+    transparent 65%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  animation: breatheAmbient 4s infinite ease-in-out alternate;
+}
+
+.glowing-entity-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 350px;
+  width: 200px;
+  z-index: 10;
+}
+
+/* Vệt sáng mặt đất */
+.base-reflection {
+  position: absolute;
+  bottom: -5px; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 20px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 80, 20, 0.6) 0%,
+    rgba(200, 30, 0, 0.1) 60%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  z-index: 1;
+  mix-blend-mode: screen;
+  animation: flickerReflection 0.25s infinite alternate;
+}
+
+/* Vỏ bọc lửa kiểm soát chiều cao & độ cong (sway) */
+.glowing-flame {
+  position: absolute;
+  bottom: 5px; 
+  left: 50%;
+  width: 70px;
+  height: 70px;
+  z-index: 2;
+  transform-origin: bottom center;
+  animation: flameSway 3s infinite ease-in-out;
+}
+
+/* Ngọn lửa với gradient lõi nhiệt cao */
+.flame-shape {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50% 0 50% 50%;
+  transform: rotate(-45deg);
+  
+  /* Lõi sáng trắng vàng ở đáy, cam đỏ tỏa ra rìa - giống hệt nhiệt độ lửa */
+  background: radial-gradient(
+    circle at bottom left,
+    #fff0cc 0%,
+    #ffb700 30%,
+    #ff6200 65%,
+    #bd2600 85%,
+    #820d00 100%
+  );
+  
+  box-shadow: 
+    inset 0px 0px 10px rgba(255, 200, 100, 0.6),
+    0 0 25px rgba(255, 90, 10, 0.8),          
+    0 0 50px rgba(255, 50, 0, 0.5),           
+    0 0 100px rgba(200, 20, 0, 0.2);          
+    
+  animation: flickerFlameLight 0.15s infinite alternate;
+}
+
+/* Các bụi than đỏ bay lưa thưa */
+.embers-container {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 250px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.ember {
+  position: absolute;
+  bottom: 60px; /* Khởi đầu từ bên trong ngọn lửa */
+  width: 2px;
+  height: 2px;
+  /* Màu đỏ than tỏa hào quang sắc lẹm */
+  background-color: #ff3300; 
+  border-radius: 50%;
+  box-shadow: 0 0 5px 1.5px rgba(255, 40, 0, 0.9);
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+/* Chuyển động bay có độ lơi trái phải tự nhiên */
+.ember-1 { left: 45%; animation: floatEmberLeft 2.5s infinite ease-out 0.2s; }
+.ember-2 { left: 55%; animation: floatEmberRight 3.2s infinite ease-out 1.5s; width: 3px; height: 3px; }
+.ember-3 { left: 50%; animation: floatEmberLeft 4s infinite ease-out 0.8s; }
+.ember-4 { left: 60%; animation: floatEmberRight 2.8s infinite ease-out 2.5s; }
+.ember-5 { left: 40%; animation: floatEmberLeft 3.5s infinite ease-out 1.2s; width: 1.5px; height: 1.5px; }
+
+
+/* =========================================
+   ANIMATIONS 
+   ========================================= */
+
+@keyframes flickerFlameLight {
+  0% {
+    box-shadow: 
+      inset 0 0 8px rgba(255, 200, 100, 0.4),
+      0 0 20px rgba(255, 90, 10, 0.6),
+      0 0 45px rgba(255, 50, 0, 0.4),
+      0 0 90px rgba(200, 20, 0, 0.15);
+  }
+  100% {
+    box-shadow: 
+      inset 0 0 12px rgba(255, 200, 100, 0.8),
+      0 0 30px rgba(255, 100, 20, 0.9),
+      0 0 55px rgba(255, 60, 5, 0.6),
+      0 0 110px rgba(200, 30, 0, 0.3);
+  }
+}
+
+@keyframes flameSway {
+  0%, 100% {
+    transform: translateX(-50%) scale(1, 1.8) skewX(0deg);
+  }
+  20% {
+    transform: translateX(-50%) scale(0.95, 1.9) skewX(2deg); 
+  }
+  50% {
+    transform: translateX(-50%) scale(1.02, 1.75) skewX(-1deg);
+  }
+  80% {
+    transform: translateX(-50%) scale(0.98, 1.85) skewX(3deg);
+  }
+}
+
+@keyframes flickerReflection {
+  0% { opacity: 0.6; transform: translateX(-50%) scale(0.95); }
+  100% { opacity: 0.9; transform: translateX(-50%) scale(1.05); }
+}
+
+@keyframes breatheAmbient {
+  0%   { opacity: 0.6; transform: translate(-50%, -50%) scale(0.95); }
+  100% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.05); }
+}
+
+@keyframes floatEmberLeft {
+  0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+  15%  { opacity: 1; transform: translateY(-20px) translateX(-5px) scale(1.2); }
+  60%  { opacity: 0.6; }
+  100% { transform: translateY(-160px) translateX(-30px) scale(0.5); opacity: 0; }
+}
+
+@keyframes floatEmberRight {
+  0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+  15%  { opacity: 1; transform: translateY(-20px) translateX(5px) scale(1.2); }
+  60%  { opacity: 0.6; }
+  100% { transform: translateY(-140px) translateX(30px) scale(0.5); opacity: 0; }
+}
